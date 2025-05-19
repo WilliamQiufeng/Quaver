@@ -213,6 +213,15 @@ namespace Quaver.Shared.Screens.Edit.Plugins.Timing
                     if (id is Qua.DefaultScrollGroupId or Qua.GlobalScrollGroupId)
                         flags |= ImGuiTabItemFlags.Leading;
 
+                    var color = timingGroup.GetColor();
+                    var colorVec4 = new Vector4(color.R, color.G, color.B, 255) / 256;
+                    var textColor = Vector4.One - colorVec4;
+                    textColor.W = 1;
+
+                    ImGui.PushStyleColor(ImGuiCol.Tab, colorVec4 * 0.7f);
+                    ImGui.PushStyleColor(ImGuiCol.TabHovered, colorVec4 * 0.9f);
+                    ImGui.PushStyleColor(ImGuiCol.TabSelected, colorVec4);
+                    ImGui.PushStyleColor(ImGuiCol.Text, textColor);
                     if (ImGuiFix.BeginTabItem($"{id}##TabItem", ref Unsafe.NullRef<bool>(), flags))
                     {
                         if (PendingSelectScrollGroupId != id
@@ -221,6 +230,11 @@ namespace Quaver.Shared.Screens.Edit.Plugins.Timing
                             SelectTimingGroup(id);
                         ImGui.EndTabItem();
                     }
+
+                    ImGui.PopStyleColor();
+                    ImGui.PopStyleColor();
+                    ImGui.PopStyleColor();
+                    ImGui.PopStyleColor();
                 }
 
                 if (ImGui.TabItemButton("+##CreateGroup", ImGuiTabItemFlags.Trailing))
@@ -269,9 +283,11 @@ namespace Quaver.Shared.Screens.Edit.Plugins.Timing
         /// </summary>
         private void DrawHeaderText()
         {
-            ImGui.TextWrapped("Scroll Velocities (SV) allow you to dynamically change the speed and direction at which the objects fall.");
+            ImGui.TextWrapped(
+                "Scroll Velocities (SV) allow you to dynamically change the speed and direction at which the objects fall.");
             ImGui.Dummy(new Vector2(0, 10));
-            ImGui.TextWrapped("You can click on an individual SV point to edit it and double-click to go to its position in time.");
+            ImGui.TextWrapped(
+                "You can click on an individual SV point to edit it and double-click to go to its position in time.");
             ShowDifferenceText();
         }
 
@@ -332,7 +348,8 @@ namespace Quaver.Shared.Screens.Edit.Plugins.Timing
                     if (!SelectedScrollVelocities.Contains(newPoint))
                         SelectedScrollVelocities.Add(newPoint);
 
-                    NeedsToScrollToFirstSelectedSv = SelectedScrollGroup.ScrollVelocities.IndexAtTime(newPoint.StartTime);
+                    NeedsToScrollToFirstSelectedSv =
+                        SelectedScrollGroup.ScrollVelocities.IndexAtTime(newPoint.StartTime);
                 }
                 else if (SelectedScrollGroup.ScrollVelocities.Count > 0)
                 {
