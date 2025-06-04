@@ -7,12 +7,13 @@
 
 using Microsoft.Xna.Framework;
 using Quaver.API.Enums;
+using Quaver.Shared.Localization;
 
 namespace Quaver.Shared.Modifiers.Mods
 {
     public class ModPaused : IGameplayModifier
     {
-        public string Name { get; set; } = "Paused";
+        public string Name { get; set; } = Translations.ModPaused_Name;
 
         public ModIdentifier ModIdentifier { get; set; } = ModIdentifier.Paused;
 

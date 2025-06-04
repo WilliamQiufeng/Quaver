@@ -1,0 +1,95 @@
+<root>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <data name="MainMenu_SinglePlayer" xml:space="preserve">
+        <value>单人游玩</value>
+    </data>
+    <data name="MainMenu_Multiplayer" xml:space="preserve">
+        <value>多人游戏</value>
+    </data>
+    <data name="MainMenu_Editor" xml:space="preserve">
+        <value>编辑谱面</value>
+    </data>
+    <data name="MainMenu_DownloadSongs" xml:space="preserve">
+        <value>下载谱面</value>
+    </data>
+    <data name="MainMenu_SteamWorkshop" xml:space="preserve">
+        <value>创意工坊</value>
+    </data>
+    <data name="MainMenu_Options" xml:space="preserve">
+        <value>选项</value>
+    </data>
+    <data name="MainMenu_QuitGame" xml:space="preserve">
+        <value>退出游戏</value>
+    </data>
+    <data name="ModifierSelector_CustomizeGameplay" xml:space="preserve">
+        <value>掌控自己的游戏体验</value>
+    </data>
+    <data name="ModifierSelector_Ranked" xml:space="preserve">
+        <value>计入排名</value>
+    </data>
+    <data name="ModifierSelector_Unranked" xml:space="preserve">
+        <value>不计入排名</value>
+    </data>
+    <data name="ModMirror_Name" xml:space="preserve">
+        <value>镜像</value>
+    </data>
+    <data name="ModifierSelector_Ranked_Description" xml:space="preserve">
+        <value>使用以下Mod可以计入排名</value>
+    </data>
+    <data name="ModifierSelector_Unranked_Description" xml:space="preserve">
+        <value>使用以下Mod将不计入排名</value>
+    </data>
+    <data name="ModMirror_Description" xml:space="preserve">
+        <value>将谱面左右反转。</value>
+    </data>
+    <data name="ModNoMiss_Name" xml:space="preserve">
+        <value>禁止Miss</value>
+    </data>
+    <data name="ModNoMiss_Description" xml:space="preserve">
+        <value>Miss一个就会失败。</value>
+    </data>
+    <data name="ModAutoplay_Name" xml:space="preserve">
+        <value>自动演示</value>
+    </data>
+    <data name="ModCoop_Name" xml:space="preserve">
+        <value>双人游戏</value>
+    </data>
+    <data name="ModFullLN_Name" xml:space="preserve">
+        <value>全长条</value>
+    </data>
+    <data name="ModInverse_Name" xml:space="preserve">
+        <value>反转长条</value>
+    </data>
+    <data name="ModJudgementWindows_Name" xml:space="preserve">
+        <value>判定窗口</value>
+    </data>
+    <data name="ModLongNoteAdjust_Name" xml:space="preserve">
+        <value>血量调整</value>
+    </data>
+    <data name="ModNoFail_Name" xml:space="preserve">
+        <value>不会死亡</value>
+    </data>
+    <data name="ModNoLongNotes_Name" xml:space="preserve">
+        <value>无长条</value>
+    </data>
+    <data name="ModNoSliderVelocities_Name" xml:space="preserve">
+        <value>禁用变速</value>
+    </data>
+    <data name="ModPaused_Name" xml:space="preserve">
+        <value>暂停过</value>
+    </data>
+    <data name="ModRandomize_Name" xml:space="preserve">
+        <value>随机</value>
+    </data>
+</root>

@@ -9,6 +9,7 @@ using System;
 using Microsoft.Xna.Framework;
 using Quaver.API.Enums;
 using Quaver.Shared.Helpers;
+using Quaver.Shared.Localization;
 
 namespace Quaver.Shared.Modifiers.Mods
 {
@@ -24,7 +25,7 @@ namespace Quaver.Shared.Modifiers.Mods
         /// </summary>
         public int Seed;
 
-        public string Name { get; set; } = "Randomize";
+        public string Name { get; set; } = Translations.ModRandomize_Name;
 
         public ModIdentifier ModIdentifier { get; set; } = ModIdentifier.Randomize;
 

@@ -3,6 +3,7 @@ using Microsoft.Xna.Framework;
 using Quaver.API.Enums;
 using Quaver.Shared.Assets;
 using Quaver.Shared.Helpers;
+using Quaver.Shared.Localization;
 using Quaver.Shared.Modifiers.Mods;
 using Quaver.Shared.Screens.Selection.UI.Modifiers.Components;
 using Wobble.Assets;
@@ -68,7 +69,7 @@ namespace Quaver.Shared.Screens.Selection.UI.Modifiers
         /// </summary>
         private void CreateSubHeaderText()
         {
-            SubHeader = new SpriteTextPlus(FontManager.GetWobbleFont(Fonts.LatoBlack), "Customize gameplay to your heart's desire".ToUpper(), 18)
+            SubHeader = new SpriteTextPlus(FontManager.GetWobbleFont(Fonts.LatoBlack), Translations.ModifierSelector_CustomizeGameplay.ToUpper(), 18)
             {
                 Parent = this,
                 Alignment = Alignment.TopRight,
@@ -96,8 +97,8 @@ namespace Quaver.Shared.Screens.Selection.UI.Modifiers
             Selector = new ModifierSelector(ActiveLeftPanel,
                 new ScalableVector2(width, ModifierSelectorBackground.Height - 4), new List<ModifierSection>
                 {
-                    new ModifierSection(width, FontAwesome.Get(FontAwesomeIcon.fa_check_mark),"Ranked",
-                        "These mods can be used for ranked scores", ColorHelper.HexToColor("#27B06E"), new List<SelectableModifier>()
+                    new ModifierSection(width, FontAwesome.Get(FontAwesomeIcon.fa_check_mark),Translations.ModifierSelector_Ranked,
+                        Translations.ModifierSelector_Ranked_Description, ColorHelper.HexToColor("#27B06E"), new List<SelectableModifier>()
                         {
                             new SelectableModifierSpeed(width),
                             new SelectableModifierJudgementWindows(width),
@@ -105,8 +106,8 @@ namespace Quaver.Shared.Screens.Selection.UI.Modifiers
                             new SelectableModifierBool(width, new ModNoMiss())
                         }),
 
-                    new ModifierSection(width, FontAwesome.Get(FontAwesomeIcon.fa_warning_sign_on_a_triangular_background), "Unranked",
-                            "Scores will not be submitted while using these", ColorHelper.HexToColor("#F2C94C"), new List<SelectableModifier>()
+                    new ModifierSection(width, FontAwesome.Get(FontAwesomeIcon.fa_warning_sign_on_a_triangular_background), Translations.ModifierSelector_Unranked,
+                            Translations.ModifierSelector_Unranked_Description, ColorHelper.HexToColor("#F2C94C"), new List<SelectableModifier>()
                         {
                             new SelectableModifierBool(width, new ModAutoplay()),
                             new SelectableModifierBool(width, new ModCoop()),

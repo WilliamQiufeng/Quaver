@@ -48,22 +48,22 @@ namespace Quaver
         public static void Main(string[] args)
         {
             // Prevents more than one instance of Quaver to run at a time
-            using (var mutex = new Mutex(false, "Global\\" + Guid))
-            {
-                if (!mutex.WaitOne(0, false))
-                {
-                    Logger.Error("Quaver is already running", LogType.Runtime);
-
-                    // Send to running instance only if we have actual data to send
-                    if (args.Length > 0)
-                        SendToRunningInstanceIpc(args);
-
-                    return;
-                }
-
-                Run();
-                return;
-            }
+            // using (var mutex = new Mutex(false, "Global\\" + Guid))
+            // {
+            //     if (!mutex.WaitOne(0, false))
+            //     {
+            //         Logger.Error("Quaver is already running", LogType.Runtime);
+            //
+            //         // Send to running instance only if we have actual data to send
+            //         if (args.Length > 0)
+            //             SendToRunningInstanceIpc(args);
+            //
+            //         return;
+            //     }
+            //
+            //     Run();
+            //     return;
+            // }
 
             // Uncomment this and comment the above mutex to allow multiple instances of Quaver to be run
             Run();
@@ -96,9 +96,9 @@ namespace Quaver
             StructuredConfigManager.Initialize();
             StartIpcServer();
 
-            CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;
-            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+            CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("zh-hans-cn");
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("zh-hans-cn");
+            Thread.CurrentThread.CurrentUICulture = new CultureInfo("zh-hans-cn");
 
             NativeAssemblies.Copy();
             SteamManager.Initialize();

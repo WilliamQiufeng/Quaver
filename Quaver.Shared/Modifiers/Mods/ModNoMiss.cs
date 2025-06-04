@@ -1,18 +1,19 @@
 ﻿using Microsoft.Xna.Framework;
 using Quaver.API.Enums;
 using Quaver.Shared.Helpers;
+using Quaver.Shared.Localization;
 
 namespace Quaver.Shared.Modifiers.Mods
 {
     public class ModNoMiss : IGameplayModifier
     {
-        public string Name { get; set; } = "No Miss";
+        public string Name { get; set; } = Translations.ModNoMiss_Name;
 
         public ModIdentifier ModIdentifier { get; set; } = ModIdentifier.NoMiss;
 
         public ModType Type { get; set; } = ModType.DifficultyIncrease;
 
-        public string Description { get; set; } = "You miss, you die.";
+        public string Description { get; set; } = Translations.ModNoMiss_Description;
 
         public bool Ranked() => true;
 

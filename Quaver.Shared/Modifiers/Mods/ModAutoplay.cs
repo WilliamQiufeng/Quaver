@@ -8,12 +8,13 @@
 using Microsoft.Xna.Framework;
 using Quaver.API.Enums;
 using Quaver.Shared.Helpers;
+using Quaver.Shared.Localization;
 
 namespace Quaver.Shared.Modifiers.Mods
 {
     public class ModAutoplay : IGameplayModifier
     {
-        public string Name { get; set; } = "Autoplay";
+        public string Name { get; set; } = Translations.ModAutoplay_Name;
 
         public ModIdentifier ModIdentifier { get; set; } = ModIdentifier.Autoplay;
 

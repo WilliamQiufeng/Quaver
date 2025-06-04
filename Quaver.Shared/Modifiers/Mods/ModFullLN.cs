@@ -1,12 +1,13 @@
 using Microsoft.Xna.Framework;
 using Quaver.API.Enums;
 using Quaver.Shared.Helpers;
+using Quaver.Shared.Localization;
 
 namespace Quaver.Shared.Modifiers.Mods
 {
     public class ModFullLN : IGameplayModifier
     {
-        public string Name { get; set; } = "Full Long Notes";
+        public string Name { get; set; } = Translations.ModFullLN_Name;
 
         public ModIdentifier ModIdentifier { get; set; } = ModIdentifier.FullLN;
 

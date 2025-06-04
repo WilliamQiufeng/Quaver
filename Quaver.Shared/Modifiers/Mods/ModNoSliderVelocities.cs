@@ -8,12 +8,13 @@
 using Microsoft.Xna.Framework;
 using Quaver.API.Enums;
 using Quaver.Shared.Helpers;
+using Quaver.Shared.Localization;
 
 namespace Quaver.Shared.Modifiers.Mods
 {
     internal class ModNoSliderVelocities : IGameplayModifier
     {
-        public string Name { get; set; } = "No Scroll Velocities";
+        public string Name { get; set; } = Translations.ModNoSliderVelocities_Name;
 
         public ModIdentifier ModIdentifier { get; set; } = ModIdentifier.NoSliderVelocity;
 

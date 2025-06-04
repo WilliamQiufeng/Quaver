@@ -4,6 +4,7 @@ using Quaver.Shared.Assets;
 using Quaver.Shared.Graphics;
 using Quaver.Shared.Graphics.Menu.Border;
 using Quaver.Shared.Helpers;
+using Quaver.Shared.Localization;
 using Quaver.Shared.Online;
 using Quaver.Shared.Screens.Main.UI;
 using Quaver.Shared.Screens.Main.UI.Nagivation;
@@ -178,19 +179,19 @@ namespace Quaver.Shared.Screens.Main
 
             NavigationButtonContainer = new NavigationButtonContainer(new List<NavigationButton>()
             {
-                new NavigationButton(FontAwesome.Get(FontAwesomeIcon.fa_gamepad_console), "Single Player",
+                new NavigationButton(FontAwesome.Get(FontAwesomeIcon.fa_gamepad_console), Translations.MainMenu_SinglePlayer,
                     (o, e) => screen?.ExitToSinglePlayer()),
-                new NavigationButton(FontAwesome.Get(FontAwesomeIcon.fa_group_profile_users), "Multiplayer",
+                new NavigationButton(FontAwesome.Get(FontAwesomeIcon.fa_group_profile_users), Translations.MainMenu_Multiplayer,
                     (o, e) => screen?.ExitToMultiplayer()),
-                new NavigationButton(FontAwesome.Get(FontAwesomeIcon.fa_pencil), "Editor",
+                new NavigationButton(FontAwesome.Get(FontAwesomeIcon.fa_pencil), Translations.MainMenu_Editor,
                     (o, e) => screen?.ExitToEditor()),
-                new NavigationButton(FontAwesome.Get(FontAwesomeIcon.fa_download_to_storage_drive), "Download Songs",
+                new NavigationButton(FontAwesome.Get(FontAwesomeIcon.fa_download_to_storage_drive), Translations.MainMenu_DownloadSongs,
                     (o, e) => screen?.ExitToDownload()),
-                new NavigationButton(FontAwesome.Get(FontAwesomeIcon.fa_open_wrench_tool_silhouette), "Steam Workshop",
+                new NavigationButton(FontAwesome.Get(FontAwesomeIcon.fa_open_wrench_tool_silhouette), Translations.MainMenu_SteamWorkshop,
                     (sender, args) => BrowserHelper.OpenURL($"https://steamcommunity.com/app/{SteamManager.ApplicationId}/workshop/")),
-                new NavigationButton(FontAwesome.Get(FontAwesomeIcon.fa_settings), "Options",
+                new NavigationButton(FontAwesome.Get(FontAwesomeIcon.fa_settings), Translations.MainMenu_Options,
                     (o, e) => DialogManager.Show(new OptionsDialog())),
-                new NavigationButton(FontAwesome.Get(FontAwesomeIcon.fa_power_button_off), "Quit Game",
+                new NavigationButton(FontAwesome.Get(FontAwesomeIcon.fa_power_button_off), Translations.MainMenu_QuitGame,
                     (o, e) => DialogManager.Show(new QuitDialog()))
                 {
                     Icon = { Tint = SkinManager.Skin?.MainMenu?.NavigationQuitButtonTextColor ?? quitColor },

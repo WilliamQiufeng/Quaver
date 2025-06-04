@@ -8,12 +8,13 @@
 using Microsoft.Xna.Framework;
 using Quaver.API.Enums;
 using Quaver.Shared.Helpers;
+using Quaver.Shared.Localization;
 
 namespace Quaver.Shared.Modifiers.Mods
 {
     public class ModNoFail : IGameplayModifier
     {
-        public string Name { get; set; } = "No Fail";
+        public string Name { get; set; } = Translations.ModNoFail_Name;
 
         public ModIdentifier ModIdentifier { get; set; } = ModIdentifier.NoFail;
 

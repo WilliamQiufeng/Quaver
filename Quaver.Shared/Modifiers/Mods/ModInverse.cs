@@ -1,12 +1,13 @@
 using Microsoft.Xna.Framework;
 using Quaver.API.Enums;
 using Quaver.Shared.Helpers;
+using Quaver.Shared.Localization;
 
 namespace Quaver.Shared.Modifiers.Mods
 {
     public class ModInverse : IGameplayModifier
     {
-        public string Name { get; set; } = "Inverse";
+        public string Name { get; set; } = Translations.ModInverse_Name;
 
         public ModIdentifier ModIdentifier { get; set; } = ModIdentifier.Inverse;
 

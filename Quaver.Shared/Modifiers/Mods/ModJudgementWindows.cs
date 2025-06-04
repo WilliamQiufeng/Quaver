@@ -1,12 +1,13 @@
 using Microsoft.Xna.Framework;
 using Quaver.API.Enums;
 using Quaver.Shared.Helpers;
+using Quaver.Shared.Localization;
 
 namespace Quaver.Shared.Modifiers.Mods
 {
     public class ModJudgementWindows : IGameplayModifier
     {
-        public string Name { get; set; } = "Judgement Windows";
+        public string Name { get; set; } = Translations.ModJudgementWindows_Name;
 
         public ModIdentifier ModIdentifier { get; set; } = ModIdentifier.None;
 
