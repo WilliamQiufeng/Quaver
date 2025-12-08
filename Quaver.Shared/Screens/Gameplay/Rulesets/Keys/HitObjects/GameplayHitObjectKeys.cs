@@ -19,8 +19,11 @@ using Quaver.Shared.Screens.Gameplay.Rulesets.HitObjects;
 using Quaver.Shared.Screens.Gameplay.Rulesets.Keys.Playfield;
 using Quaver.Shared.Screens.Gameplay.Rulesets.Keys.Playfield.Hits;
 using Quaver.Shared.Skinning;
+using Wobble;
 using Wobble.Graphics;
 using Wobble.Graphics.Sprites;
+using Wobble.Window;
+using Shader = Wobble.Graphics.Shaders.Shader;
 
 namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
 {
@@ -266,6 +269,34 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
                 LongNoteBodySprite.Tint = tint;
                 LongNoteEndSprite.Tint = tint;
                 var bodies = GetHoldBodyTexture(info.Lane, manager.Ruleset.Mode);
+
+                if (info.HitObjectInfo.Type == HitObjectType.Mine)
+                {
+                    LongNoteBodySprite.SpriteBatchOptions = new SpriteBatchOptions()
+                    {
+                        SortMode = SpriteSortMode.Deferred,
+                        BlendState = BlendState.NonPremultiplied,
+                        SamplerState = SamplerState.PointClamp,
+                        DepthStencilState = DepthStencilState.Default,
+                        RasterizerState = RasterizerState.CullNone,
+                        Shader = new Shader(GameBase.Game.Resources.Get("Quaver.Resources/Shaders/glitch2.mgfxo"),
+                            new Dictionary<string, object>()
+                            {
+                                { "p_time", (float)(manager.CurrentVisualAudioOffset / 1000f) }, // time in seconds
+                                { "p_resolution", Vector2.One }, // screen resolution
+
+                                { "p_abberation_strength", 10f }, // strenght of the chromatic abberation
+                                { "p_glitch_height", 2 }, // height of glitch lines in pixels
+                                { "p_glitch_size", 30f }, // max x offset
+                                { "p_update_rate", 10f }, // arbitrary update rate
+                            })
+                    };
+                }
+                else
+                {
+                    HitObjectSprite.SpriteBatchOptions = null;
+                }
+                
                 LongNoteBodySprite.ReplaceFrames(bodies);
 
                 LongNoteEndSprite.Image = GetHoldEndTexture(info.Lane, manager.Ruleset.Mode);
@@ -381,6 +412,10 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
         /// </summary>
         public void UpdateSpritePositions(double curTime)
         {
+
+            LongNoteBodySprite.SpriteBatchOptions?.Shader.SetParameter("p_time",
+                (float)(GameBase.Game.TimeRunning / 1000f), true);
+            Console.WriteLine($"{LongNoteBodySprite.SpriteBatchOptions?.Shader.Parameters["p_time"]}");
             Info.UpdatePositions(curTime);
             // Update Sprite position with regards to LN's state
             //
