@@ -1351,7 +1351,7 @@ namespace Quaver.Shared.Screens.Edit.UI.Playfield
             if (hitObject == null && !KeyboardManager.IsCtrlDown())
                 SelectedHitObjects.Clear();
 
-            if (Tool.Value == EditorCompositionTool.Select || Tool.Value == EditorCompositionTool.LongNote)
+            if (Tool.Value is EditorCompositionTool.Select or EditorCompositionTool.LongNote or EditorCompositionTool.Mine)
             {
                 HandleHitObjectSelectTool(hitObject);
 
