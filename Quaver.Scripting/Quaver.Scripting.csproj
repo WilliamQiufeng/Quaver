@@ -9,10 +9,23 @@
     <Target Name="BuildLuaWorker" BeforeTargets="Build">
         <Exec
                 Condition="'$(Configuration)' == 'Release'"
-                Command="cargo build --release --manifest-path ../Quaver.Scripting.Native/worker/Cargo.toml" />
+                Command="cargo build --release --manifest-path ../Quaver.Scripting.Native/Cargo.toml"/>
 
         <Exec
                 Condition="'$(Configuration)' != 'Release'"
-                Command="cargo build --manifest-path ../Quaver.Scripting.Native/worker/Cargo.toml" />
+                Command="cargo build --manifest-path ../Quaver.Scripting.Native/Cargo.toml"/>
     </Target>
+
+    <ItemGroup>
+        <None
+                Condition="'$(Configuration)' != 'Release'"
+                Update="../Quaver.Scripting.Native/target/debug/worker">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+        <None
+                Condition="'$(Configuration)' == 'Release'"
+                Update="../Quaver.Scripting.Native/target/release/worker">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
 </Project>

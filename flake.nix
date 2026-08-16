@@ -64,18 +64,28 @@
             pkgs.dotnet-sdk_10
             pkgs.dotnetCorePackages.sdk_8_0
           ];
+          nativeRustToolchain = pkgs.rust-bin.selectLatestNightlyWith
+            (toolchain: toolchain.default);
+          nativeRustBuildDeps = with pkgs; [
+            pkg-config
+            rustPlatform.bindgenHook
+          ];
         in {
           _module.args.pkgs = pkgs;
 
           packages.default = self'.packages.quaver-scripting-native;
 
           devShells.default = pkgs.mkShell {
-            nativeBuildInputs = [ dotnetSdk ];
+            nativeBuildInputs = [
+              dotnetSdk
+              nativeRustToolchain
+            ] ++ nativeRustBuildDeps;
 
             shellHook = ''
               export NIX_LD_LIBRARY_PATH=${quaverLibraryPath}:${openglDriverPath}:$NIX_LD_LIBRARY_PATH
               export DOTNET_ROOT=${dotnetSdk}/share/dotnet
               export DOTNET_ROLL_FORWARD="LatestMajor"
+              export RUST_SRC_PATH=${pkgs.rustPlatform.rustLibSrc}
               export SDL_VIDEO_X11_WMCLASS=Quaver
               export NIX_LD_LIBRARY_PATH=$NIX_LD_LIBRARY_PATH:$PWD/Quaver.Shared
               export LD_LIBRARY_PATH=${quaverLibraryPath}:${openglDriverPath}:$LD_LIBRARY_PATH:$PWD/Quaver.Shared
