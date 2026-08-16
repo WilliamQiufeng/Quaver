@@ -7,3 +7,6 @@
 [submodule "Quaver.Server.Client"]
 	path = Quaver.Server.Client
 	url = https://github.com/Quaver/Quaver.Server.Client
+[submodule "Quaver.Scripting.Native"]
+	path = Quaver.Scripting.Native
+	url = git@github.com:WilliamQiufeng/Quaver.Scripting.git

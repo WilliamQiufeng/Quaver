@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <LangVersion>14</LangVersion>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+    <Target Name="BuildLuaWorker" BeforeTargets="Build">
+        <Exec
+                Condition="'$(Configuration)' == 'Release'"
+                Command="cargo build --release --manifest-path ../Quaver.Scripting.Native/worker/Cargo.toml" />
+
+        <Exec
+                Condition="'$(Configuration)' != 'Release'"
+                Command="cargo build --manifest-path ../Quaver.Scripting.Native/worker/Cargo.toml" />
+    </Target>
+</Project>

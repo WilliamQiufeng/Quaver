@@ -21,6 +21,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wobble.Extended", "Wobble\W
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quaver.Server.Client", "Quaver.Server.Client\Quaver.Server.Client\Quaver.Server.Client.csproj", "{33907E03-34E6-4C21-8F52-83AD1031EC41}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Quaver.Scripting", "Quaver.Scripting\Quaver.Scripting.csproj", "{6EA7695B-FD2D-4B77-B716-5DED5B975666}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -110,6 +112,16 @@ Global
 		{33907E03-34E6-4C21-8F52-83AD1031EC41}.Test Server|Any CPU.Build.0 = Test Server|Any CPU
 		{33907E03-34E6-4C21-8F52-83AD1031EC41}.Visual Tests|Any CPU.ActiveCfg = Debug|Any CPU
 		{33907E03-34E6-4C21-8F52-83AD1031EC41}.Visual Tests|Any CPU.Build.0 = Debug|Any CPU
+		{6EA7695B-FD2D-4B77-B716-5DED5B975666}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6EA7695B-FD2D-4B77-B716-5DED5B975666}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6EA7695B-FD2D-4B77-B716-5DED5B975666}.Public|Any CPU.ActiveCfg = Debug|Any CPU
+		{6EA7695B-FD2D-4B77-B716-5DED5B975666}.Public|Any CPU.Build.0 = Debug|Any CPU
+		{6EA7695B-FD2D-4B77-B716-5DED5B975666}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6EA7695B-FD2D-4B77-B716-5DED5B975666}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6EA7695B-FD2D-4B77-B716-5DED5B975666}.Test Server|Any CPU.ActiveCfg = Debug|Any CPU
+		{6EA7695B-FD2D-4B77-B716-5DED5B975666}.Test Server|Any CPU.Build.0 = Debug|Any CPU
+		{6EA7695B-FD2D-4B77-B716-5DED5B975666}.Visual Tests|Any CPU.ActiveCfg = Debug|Any CPU
+		{6EA7695B-FD2D-4B77-B716-5DED5B975666}.Visual Tests|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
