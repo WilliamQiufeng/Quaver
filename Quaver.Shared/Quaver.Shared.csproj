@@ -17,6 +17,7 @@
     <ProjectReference Include="../Wobble/Wobble.Extended/Wobble.Extended.csproj" />
     <ProjectReference Include="../Wobble/Wobble.Resources/Wobble.Resources.csproj" />
     <ProjectReference Include="../Wobble/Wobble/Wobble.csproj" />
+    <ProjectReference Include="..\Quaver.Scripting\Quaver.Scripting.csproj" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../Quaver.Server.Client/Quaver.Server.Client/Quaver.Server.Client.csproj" Condition="Exists('../Quaver.Server.Client/Quaver.Server.Client/Quaver.Server.Client.csproj')" />
