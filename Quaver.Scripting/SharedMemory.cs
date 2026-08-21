@@ -51,7 +51,11 @@ public unsafe class SharedMemory : IDisposable
     public SharedMemory(MemoryMappedFile file, int size)
     {
         var layoutSize = Unsafe.SizeOf<SharedMemoryLayout>();
-        Debug.Assert(size > layoutSize);
+        if (size <= layoutSize)
+        {
+            throw new InvalidOperationException("Insufficient size allocated to shared memory");
+        }
+
         _accessor = file.CreateViewAccessor(0, size, MemoryMappedFileAccess.ReadWrite);
         byte* ptr = null;
         _accessor.SafeMemoryMappedViewHandle.AcquirePointer(ref ptr);
@@ -64,10 +68,12 @@ public unsafe class SharedMemory : IDisposable
         SharedMemoryLayout.HostToWorker.Offset = 0;
         SharedMemoryLayout.WorkerToHost.Offset = SharedMemoryLayout.ChannelSize;
         _hostToWorkerPayload =
-            new UnmanagedMemoryManager<byte>(_pointer + SharedMemoryLayout.HostToWorker.Offset,
+            new UnmanagedMemoryManager<byte>(
+                _pointer + layoutSize + SharedMemoryLayout.HostToWorker.Offset,
                 channelSize);
         _workerToHostPayload =
-            new UnmanagedMemoryManager<byte>(_pointer + SharedMemoryLayout.WorkerToHost.Offset,
+            new UnmanagedMemoryManager<byte>(
+                _pointer + layoutSize + SharedMemoryLayout.WorkerToHost.Offset,
                 channelSize);
     }
 
