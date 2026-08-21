@@ -12,14 +12,22 @@ public struct SharedMemoryChannel
     [FieldOffset(0)] public ulong Offset;
     [FieldOffset(8)] public ulong Write;
     [FieldOffset(16)] public ulong Read;
+
+    public void Reset()
+    {
+        Write = 0;
+        Read = 0;
+    }
 }
 
 [StructLayout(LayoutKind.Explicit, Size = 64)]
 public struct SharedMemoryLayout
 {
-    [FieldOffset(0)] public Int32 Magic;
-    [FieldOffset(4)] public Int32 Version;
-    [FieldOffset(8)] public UInt64 ChannelSize;
+    public const uint ConstMagic = 0x95abe799;
+    public const uint ConstVersion = 1;
+    [FieldOffset(0)] public uint Magic;
+    [FieldOffset(4)] public uint Version;
+    [FieldOffset(8)] public ulong ChannelSize;
     [FieldOffset(16)] public SharedMemoryChannel HostToWorker;
     [FieldOffset(40)] public SharedMemoryChannel WorkerToHost;
 }
@@ -62,6 +70,9 @@ public unsafe class SharedMemory : IDisposable
         _pointer = ptr + _accessor.PointerOffset;
         _layout = (SharedMemoryLayout*)_pointer;
 
+        SharedMemoryLayout.HostToWorker.Reset();
+        SharedMemoryLayout.WorkerToHost.Reset();
+
         const int align = 8;
         var channelSize = ((size - layoutSize) / 2) & ~(align - 1);
         SharedMemoryLayout.ChannelSize = (ulong)channelSize;
@@ -75,6 +86,10 @@ public unsafe class SharedMemory : IDisposable
             new UnmanagedMemoryManager<byte>(
                 _pointer + layoutSize + SharedMemoryLayout.WorkerToHost.Offset,
                 channelSize);
+
+        // Set it last so everything is initialized before rust checks
+        SharedMemoryLayout.Magic = SharedMemoryLayout.ConstMagic;
+        SharedMemoryLayout.Version = SharedMemoryLayout.ConstVersion;
     }
 
     private ref SharedMemoryLayout SharedMemoryLayout =>
