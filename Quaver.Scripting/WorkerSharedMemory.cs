@@ -48,7 +48,7 @@ public unsafe sealed class UnmanagedMemoryManager<T>(T* pointer, int length) : M
     }
 }
 
-public class SharedMemory : IDisposable
+public class WorkerSharedMemory : IDisposable
 {
     private readonly MemoryMappedFile _file;
     private readonly MemoryMappedViewAccessor _accessor;
@@ -57,7 +57,7 @@ public class SharedMemory : IDisposable
     private readonly UnmanagedMemoryManager<byte> _workerToHostPayload;
     private unsafe byte* _pointer;
 
-    public unsafe SharedMemory(MemoryMappedFile file, int size)
+    public unsafe WorkerSharedMemory(MemoryMappedFile file, int size)
     {
         _file = file;
         var layoutSize = Unsafe.SizeOf<SharedMemoryLayout>();

@@ -6,27 +6,32 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <LuaWorkerProfile Condition="'$(Configuration)' == 'Release'">release</LuaWorkerProfile>
+        <LuaWorkerProfile Condition="'$(Configuration)' != 'Release'">debug</LuaWorkerProfile>
+        <LuaWorkerBinaryName Condition="$([MSBuild]::IsOSPlatform('Windows'))">worker.exe</LuaWorkerBinaryName>
+        <LuaWorkerBinaryName Condition="!$([MSBuild]::IsOSPlatform('Windows'))">worker</LuaWorkerBinaryName>
+        <LuaWorkerBinary>$(MSBuildProjectDirectory)/../Quaver.Scripting.Native/target/$(LuaWorkerProfile)/$(LuaWorkerBinaryName)</LuaWorkerBinary>
+        <QuaverBinaryDirectory>$(MSBuildProjectDirectory)/../Quaver/bin/$(Configuration)/$(TargetFramework)</QuaverBinaryDirectory>
     </PropertyGroup>
-    <Target Name="BuildLuaWorker" BeforeTargets="Build">
+
+    <Target Name="BuildLuaWorker" BeforeTargets="CoreCompile">
         <Exec
                 Condition="'$(Configuration)' == 'Release'"
-                Command="cargo build --release --manifest-path ../Quaver.Scripting.Native/Cargo.toml"/>
+                Command="cargo build --release --manifest-path &quot;$(MSBuildProjectDirectory)/../Quaver.Scripting.Native/Cargo.toml&quot;"/>
 
         <Exec
                 Condition="'$(Configuration)' != 'Release'"
-                Command="cargo build --manifest-path ../Quaver.Scripting.Native/Cargo.toml"/>
+                Command="cargo build --manifest-path &quot;$(MSBuildProjectDirectory)/../Quaver.Scripting.Native/Cargo.toml&quot;"/>
     </Target>
 
-    <ItemGroup>
-        <None
-                Condition="'$(Configuration)' != 'Release'"
-                Update="../Quaver.Scripting.Native/target/debug/worker">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-        <None
-                Condition="'$(Configuration)' == 'Release'"
-                Update="../Quaver.Scripting.Native/target/release/worker">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-    </ItemGroup>
+    <Target Name="CopyLuaWorkerToQuaverBinaryDirectory" AfterTargets="Build" DependsOnTargets="BuildLuaWorker">
+        <Error
+                Condition="!Exists('$(LuaWorkerBinary)')"
+                Text="Lua worker binary was not found at '$(LuaWorkerBinary)'."/>
+        <MakeDir Directories="$(QuaverBinaryDirectory)"/>
+        <Copy
+                SourceFiles="$(LuaWorkerBinary)"
+                DestinationFolder="$(QuaverBinaryDirectory)"
+                SkipUnchangedFiles="true"/>
+    </Target>
 </Project>
