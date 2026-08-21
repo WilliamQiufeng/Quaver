@@ -48,16 +48,18 @@ public unsafe sealed class UnmanagedMemoryManager<T>(T* pointer, int length) : M
     }
 }
 
-public unsafe class SharedMemory : IDisposable
+public class SharedMemory : IDisposable
 {
+    private readonly MemoryMappedFile _file;
     private readonly MemoryMappedViewAccessor _accessor;
-    private readonly SharedMemoryLayout* _layout;
+    private readonly unsafe SharedMemoryLayout* _layout;
     private readonly UnmanagedMemoryManager<byte> _hostToWorkerPayload;
     private readonly UnmanagedMemoryManager<byte> _workerToHostPayload;
-    private byte* _pointer;
+    private unsafe byte* _pointer;
 
-    public SharedMemory(MemoryMappedFile file, int size)
+    public unsafe SharedMemory(MemoryMappedFile file, int size)
     {
+        _file = file;
         var layoutSize = Unsafe.SizeOf<SharedMemoryLayout>();
         if (size <= layoutSize)
         {
@@ -92,8 +94,16 @@ public unsafe class SharedMemory : IDisposable
         SharedMemoryLayout.Version = SharedMemoryLayout.ConstVersion;
     }
 
-    private ref SharedMemoryLayout SharedMemoryLayout =>
-        ref Unsafe.AsRef<SharedMemoryLayout>(_layout);
+    private ref SharedMemoryLayout SharedMemoryLayout
+    {
+        get
+        {
+            unsafe
+            {
+                return ref Unsafe.AsRef<SharedMemoryLayout>(_layout);
+            }
+        }
+    }
 
     public int Read(Span<byte> output)
     {
@@ -171,12 +181,16 @@ public unsafe class SharedMemory : IDisposable
         ((IDisposable)_hostToWorkerPayload).Dispose();
         ((IDisposable)_workerToHostPayload).Dispose();
 
-        if (_pointer != null)
+        unsafe
         {
-            _accessor.SafeMemoryMappedViewHandle.ReleasePointer();
-            _pointer = null;
+            if (_pointer != null)
+            {
+                _accessor.SafeMemoryMappedViewHandle.ReleasePointer();
+                _pointer = null;
+            }
         }
 
         _accessor.Dispose();
+        _file.Dispose();
     }
 }
