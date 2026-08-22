@@ -1,5 +1,4 @@
-﻿using System.Buffers;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO.MemoryMappedFiles;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -7,7 +6,7 @@ using System.Runtime.InteropServices;
 namespace Quaver.Scripting;
 
 [StructLayout(LayoutKind.Explicit, Size = 24)]
-public struct SharedMemoryChannel
+public struct SimplexChannel
 {
     [FieldOffset(0)] public ulong Offset;
     [FieldOffset(8)] public ulong Write;
@@ -21,46 +20,30 @@ public struct SharedMemoryChannel
 }
 
 [StructLayout(LayoutKind.Explicit, Size = 64)]
-public struct SharedMemoryLayout
+public struct DuplexLayout
 {
     public const uint ConstMagic = 0x95abe799;
     public const uint ConstVersion = 1;
     [FieldOffset(0)] public uint Magic;
     [FieldOffset(4)] public uint Version;
     [FieldOffset(8)] public ulong ChannelSize;
-    [FieldOffset(16)] public SharedMemoryChannel HostToWorker;
-    [FieldOffset(40)] public SharedMemoryChannel WorkerToHost;
+    [FieldOffset(16)] public SimplexChannel HostToWorker;
+    [FieldOffset(40)] public SimplexChannel WorkerToHost;
 }
 
-public unsafe sealed class UnmanagedMemoryManager<T>(T* pointer, int length) : MemoryManager<T>
-    where T : unmanaged
-{
-    public override Span<T> GetSpan() => new(pointer, length);
-
-    public override MemoryHandle Pin(int elementIndex = 0) => new(pointer + elementIndex);
-
-    public override void Unpin()
-    {
-    }
-
-    protected override void Dispose(bool disposing)
-    {
-    }
-}
-
-public class WorkerSharedMemory : IDisposable
+public class Duplex : IDisposable
 {
     private readonly MemoryMappedFile _file;
     private readonly MemoryMappedViewAccessor _accessor;
-    private readonly unsafe SharedMemoryLayout* _layout;
+    private readonly unsafe DuplexLayout* _layout;
     private readonly UnmanagedMemoryManager<byte> _hostToWorkerPayload;
     private readonly UnmanagedMemoryManager<byte> _workerToHostPayload;
     private unsafe byte* _pointer;
 
-    public unsafe WorkerSharedMemory(MemoryMappedFile file, int size)
+    public unsafe Duplex(MemoryMappedFile file, int size)
     {
         _file = file;
-        var layoutSize = Unsafe.SizeOf<SharedMemoryLayout>();
+        var layoutSize = Unsafe.SizeOf<DuplexLayout>();
         if (size <= layoutSize)
         {
             throw new InvalidOperationException("Insufficient size allocated to shared memory");
@@ -70,44 +53,44 @@ public class WorkerSharedMemory : IDisposable
         byte* ptr = null;
         _accessor.SafeMemoryMappedViewHandle.AcquirePointer(ref ptr);
         _pointer = ptr + _accessor.PointerOffset;
-        _layout = (SharedMemoryLayout*)_pointer;
+        _layout = (DuplexLayout*)_pointer;
 
-        SharedMemoryLayout.HostToWorker.Reset();
-        SharedMemoryLayout.WorkerToHost.Reset();
+        DuplexLayout.HostToWorker.Reset();
+        DuplexLayout.WorkerToHost.Reset();
 
         const int align = 8;
         var channelSize = ((size - layoutSize) / 2) & ~(align - 1);
-        SharedMemoryLayout.ChannelSize = (ulong)channelSize;
-        SharedMemoryLayout.HostToWorker.Offset = 0;
-        SharedMemoryLayout.WorkerToHost.Offset = SharedMemoryLayout.ChannelSize;
+        DuplexLayout.ChannelSize = (ulong)channelSize;
+        DuplexLayout.HostToWorker.Offset = 0;
+        DuplexLayout.WorkerToHost.Offset = DuplexLayout.ChannelSize;
         _hostToWorkerPayload =
             new UnmanagedMemoryManager<byte>(
-                _pointer + layoutSize + SharedMemoryLayout.HostToWorker.Offset,
+                _pointer + layoutSize + DuplexLayout.HostToWorker.Offset,
                 channelSize);
         _workerToHostPayload =
             new UnmanagedMemoryManager<byte>(
-                _pointer + layoutSize + SharedMemoryLayout.WorkerToHost.Offset,
+                _pointer + layoutSize + DuplexLayout.WorkerToHost.Offset,
                 channelSize);
 
         // Set it last so everything is initialized before rust checks
-        SharedMemoryLayout.Magic = SharedMemoryLayout.ConstMagic;
-        SharedMemoryLayout.Version = SharedMemoryLayout.ConstVersion;
+        DuplexLayout.Magic = DuplexLayout.ConstMagic;
+        DuplexLayout.Version = DuplexLayout.ConstVersion;
     }
 
-    private ref SharedMemoryLayout SharedMemoryLayout
+    private ref DuplexLayout DuplexLayout
     {
         get
         {
             unsafe
             {
-                return ref Unsafe.AsRef<SharedMemoryLayout>(_layout);
+                return ref Unsafe.AsRef<DuplexLayout>(_layout);
             }
         }
     }
 
     public int Read(Span<byte> output)
     {
-        ref var channel = ref SharedMemoryLayout.WorkerToHost;
+        ref var channel = ref DuplexLayout.WorkerToHost;
         var buffer = _workerToHostPayload.GetSpan();
 
         if (buffer.IsEmpty || output.IsEmpty)
@@ -127,7 +110,7 @@ public class WorkerSharedMemory : IDisposable
 
     public int Write(ReadOnlySpan<byte> input)
     {
-        ref var channel = ref SharedMemoryLayout.HostToWorker;
+        ref var channel = ref DuplexLayout.HostToWorker;
         var buffer = _hostToWorkerPayload.GetSpan();
 
         if (buffer.IsEmpty || input.IsEmpty)
