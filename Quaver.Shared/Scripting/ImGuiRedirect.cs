@@ -2,7 +2,7 @@ using System;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 using MoonSharp.Interpreter;
 using MoonSharp.Interpreter.CoreLib;
 using MoonSharp.Interpreter.Interop;
@@ -257,9 +257,13 @@ namespace Quaver.Shared.Scripting
         public static void TreeAdvanceToLabelPos() =>
             ImGui.SetCursorPosX(ImGui.GetCursorPosX() + ImGui.GetTreeNodeToLabelSpacing());
 
-        public static void TreePush() => ImGui.TreePush(null);
-
-        public static void TreePush(nint ptr_id) => ImGui.TreePush(ptr_id);
+        public static void TreePush()
+        {
+            unsafe
+            {
+                ImGui.TreePush((void*)null);
+            }
+        }
 
         public static void TreePush(string str_id) => ImGui.TreePush(str_id);
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 using Microsoft.Xna.Framework;
 using Quaver.API.Enums;
 using Quaver.API.Maps;
@@ -107,7 +107,7 @@ namespace Quaver.Shared.Screens.Edit.UI.Menu
         /// </summary>
         private void CreateFileSection()
         {
-            ImGui.PushFont(Options.Fonts.First().Context);
+            ImGui.PushFont(Options.Fonts.First().Context, 20);
 
             if (!ImGui.BeginMenu(LocalizationManager.Get("Screen_Editor_File")))
                 return;
@@ -206,7 +206,7 @@ namespace Quaver.Shared.Screens.Edit.UI.Menu
         /// </summary>
         private void CreateEditSection()
         {
-            ImGui.PushFont(Options.Fonts.First().Context);
+            ImGui.PushFont(Options.Fonts.First().Context, 20);
 
             if (!ImGui.BeginMenu(LocalizationManager.Get("Screen_Editor_Edit")))
                 return;
@@ -484,7 +484,7 @@ namespace Quaver.Shared.Screens.Edit.UI.Menu
         /// </summary>
         private void CreateViewSection()
         {
-            ImGui.PushFont(Options.Fonts.First().Context);
+            ImGui.PushFont(Options.Fonts.First().Context, 20);
 
             if (!ImGui.BeginMenu(LocalizationManager.Get("Screen_Editor_View")))
                 return;
@@ -862,7 +862,7 @@ namespace Quaver.Shared.Screens.Edit.UI.Menu
         /// </summary>
         private void CreateToolsSection()
         {
-            ImGui.PushFont(Options.Fonts.First().Context);
+            ImGui.PushFont(Options.Fonts.First().Context, 20);
 
             if (!ImGui.BeginMenu(LocalizationManager.Get("Screen_Editor_Tools")))
                 return;
@@ -898,7 +898,7 @@ namespace Quaver.Shared.Screens.Edit.UI.Menu
         /// </summary>
         private void CreatePluginsSection()
         {
-            ImGui.PushFont(Options.Fonts.First().Context);
+            ImGui.PushFont(Options.Fonts.First().Context, 20);
 
             if (!ImGui.BeginMenu(LocalizationManager.Get("Screen_Editor_Plugins")))
                 return;
@@ -1001,7 +1001,7 @@ namespace Quaver.Shared.Screens.Edit.UI.Menu
         /// </summary>
         private void CreateHelpSection()
         {
-            ImGui.PushFont(Options.Fonts.First().Context);
+            ImGui.PushFont(Options.Fonts.First().Context, 20);
 
             if (!ImGui.BeginMenu(LocalizationManager.Get("Screen_Editor_Help")))
                 return;
@@ -1031,7 +1031,7 @@ namespace Quaver.Shared.Screens.Edit.UI.Menu
         /// </summary>
         private void CreateWebSection()
         {
-            ImGui.PushFont(Options.Fonts.First().Context);
+            ImGui.PushFont(Options.Fonts.First().Context, 20);
 
             if (!ImGui.BeginMenu(LocalizationManager.Get("Screen_Editor_Web")))
                 return;
@@ -1049,7 +1049,7 @@ namespace Quaver.Shared.Screens.Edit.UI.Menu
         /// </summary>
         private void CreateAudioSection()
         {
-            ImGui.PushFont(Options.Fonts.First().Context);
+            ImGui.PushFont(Options.Fonts.First().Context, 20);
 
             if (!ImGui.BeginMenu(LocalizationManager.Get("Screen_Editor_Audio")))
                 return;
@@ -1109,7 +1109,7 @@ namespace Quaver.Shared.Screens.Edit.UI.Menu
         /// </summary>
         private void CreateKeybindsSection()
         {
-            ImGui.PushFont(Options.Fonts.First().Context);
+            ImGui.PushFont(Options.Fonts.First().Context, 20);
 
             if (!ImGui.BeginMenu(LocalizationManager.Get("Screen_Editor_Keybinds")))
                 return;

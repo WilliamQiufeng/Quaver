@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 using Microsoft.Xna.Framework.Input;
 using MoonSharp.Interpreter;
 using MoonSharp.Interpreter.CoreLib;
@@ -46,7 +46,7 @@ namespace Quaver.Shared.Scripting
 
         private static readonly IUserDataDescriptor s_imguiRedirects = UserData.RegisterType(typeof(ImGuiRedirect));
 
-        private static readonly StringComparer s_comparer = StringComparer.OrdinalIgnoreCase;
+        private static readonly StringComparer s_comparer = StringComparer.Ordinal;
 
         private static readonly Dictionary<string, DynValue> s_methods = MethodNamesOf(typeof(ImGui))
            .Distinct()
@@ -198,7 +198,7 @@ namespace Quaver.Shared.Scripting
             Script.GlobalOptions.CustomConverters.SetScriptToClrCustomConversion(
                 DataType.Boolean,
                 typeof(ImGuiChildFlags),
-                x => x.Boolean ? ImGuiChildFlags.Border : ImGuiChildFlags.None
+                x => x.Boolean ? ImGuiChildFlags.Borders : ImGuiChildFlags.None
             );
 
             UserData.RegisterAssembly(typeof(SliderVelocityInfo).Assembly);

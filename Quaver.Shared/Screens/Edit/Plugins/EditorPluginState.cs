@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 using MoonSharp.Interpreter;
 using MoonSharp.Interpreter.Interop;
 using Quaver.API.Maps.Structures;
@@ -84,7 +84,7 @@ namespace Quaver.Shared.Screens.Edit.Plugins
         /// <summary>
         ///     Pushes all styles to the current imgui context
         /// </summary>
-        public void PushImguiStyle() => ImGui.PushFont(Options.Fonts.First().Context);
+        public void PushImguiStyle() => ImGui.PushFont(Options.Fonts.First().Context, 20);
 
         /// <summary>
         ///     Creates the deep copy of this instance.

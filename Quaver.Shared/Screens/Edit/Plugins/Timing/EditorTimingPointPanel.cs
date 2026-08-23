@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Quaver.API.Enums;
@@ -121,7 +121,7 @@ namespace Quaver.Shared.Screens.Edit.Plugins.Timing
         protected override void RenderImguiLayout()
         {
             ImGui.SetNextWindowSizeConstraints(new Vector2(450, 0), new Vector2(450, float.MaxValue));
-            ImGui.PushFont(Options.Fonts.First().Context);
+            ImGui.PushFont(Options.Fonts.First().Context, 20);
             ((IColoredImGuiTitle)this).ImGuiPushTitleColors();
             EditorImGui.Begin(this, Name);
 

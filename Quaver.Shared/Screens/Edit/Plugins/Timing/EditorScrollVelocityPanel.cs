@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using ImGuiNET;
+using Hexa.NET.ImGui;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Quaver.API.Helpers;
@@ -151,7 +151,7 @@ namespace Quaver.Shared.Screens.Edit.Plugins.Timing
         protected override void RenderImguiLayout()
         {
             ImGui.SetNextWindowSizeConstraints(new Vector2(356, 0), new Vector2(600, float.MaxValue));
-            ImGui.PushFont(Options.Fonts.First().Context);
+            ImGui.PushFont(Options.Fonts.First().Context, 20);
             ((IColoredImGuiTitle)this).ImGuiPushTitleColors();
             EditorImGui.Begin(this, Name);
 
@@ -214,7 +214,7 @@ namespace Quaver.Shared.Screens.Edit.Plugins.Timing
                     if (id is Qua.DefaultScrollGroupId or Qua.GlobalScrollGroupId)
                         flags |= ImGuiTabItemFlags.Leading;
 
-                    if (ImGuiFix.BeginTabItem($"{id}##TabItem", ref Unsafe.NullRef<bool>(), flags))
+                    if (ImGui.BeginTabItem($"{id}##TabItem", ref Unsafe.NullRef<bool>(), flags))
                     {
                         if (PendingSelectScrollGroupId != id
                             && SelectedScrollGroupId != id
