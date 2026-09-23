@@ -211,38 +211,11 @@ public class ScrollGroupControllerKeys : TimingGroupControllerKeys
         return changes;
     }
 
-    /// <summary>
-    ///     Returns true if the playfield is going backwards at the given time.
-    /// </summary>
-    /// <param name="time"></param>
-    /// <returns></returns>
-    public bool IsSVNegative(double time)
+    public bool IsScrollSpeedNegative(double time)
     {
         if (Ruleset.ScoreProcessor.Mods.HasFlag(ModIdentifier.NoSliderVelocity))
             return false;
-
-        // Find the SV index at time.
-        int i;
-        for (i = 0; i < ScrollVelocityInfos.Count; i++)
-        {
-            if (time < ScrollVelocityInfos[i].StartTime)
-                break;
-        }
-
-        i--;
-
-        // Find index of the last non-zero SV.
-        for (; i >= 0; i--)
-        {
-            // ReSharper disable once CompareOfFloatsByEqualityOperator
-            if (ScrollVelocityInfos[i].Multiplier != 0)
-                break;
-        }
-
-        if (i == -1)
-            return ScrollGroup.InitialScrollVelocity < 0;
-
-        return ScrollVelocityInfos[i].Multiplier < 0;
+        return (ScrollGroup.GetScrollVelocityAt(time)?.Multiplier ?? 1f) * (ScrollGroup.GetScrollSpeedFactorAt(time)?.Multiplier ?? 1f) < 0;
     }
 
     public override void HandleSkip()

@@ -420,7 +420,9 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
         /// <returns>Shrunk height, minimum 0.</returns>
         private float PercyHeight(double height)
         {
-            return (float)Math.Max(0, height - PercyReduction);
+            if (height > 0)
+                return (float)Math.Max(0, height - PercyReduction);
+            return (float)Math.Min(0, height + PercyReduction);
         }
 
         /// <summary>
@@ -475,9 +477,10 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
             var earliestHeldPosition = Info.GetSpritePosition(HitPosition, Info.EarliestHeldPosition);
 
             var longNoteBodyHeight = PercyHeight(currentLongNoteBodySize);
-            LongNoteBodySprite.Height = longNoteBodyHeight;
 
-            if (ScrollDirection.Equals(ScrollDirection.Down))
+            LongNoteBodySprite.Height = MathF.Abs(longNoteBodyHeight);
+
+            if (ScrollDirection.Equals(ScrollDirection.Down) ^ (longNoteBodyHeight < 0))
                 LongNoteBodySprite.Y = earliestHeldPosition + LongNoteBodyOffset - longNoteBodyHeight;
             else
                 LongNoteBodySprite.Y = earliestHeldPosition + LongNoteBodyOffset;
@@ -487,10 +490,10 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
             // Stop drawing LN body + end if the ln reaches half the height of the hitobject
             // (prevents body + end extending below this point)
             var longNoteOverlap =
-                longNoteBodyHeight + LongNoteSizeDifference <= HitObjectSprite.Height / 2f ||
-                longNoteBodyHeight <= 0 ||
-                                  curTime >= Info.EndTime && Info.State is HitObjectState.Held or HitObjectState.Dead;
-            LongNoteEndSprite.Visible = !longNoteOverlap && SkinManager.Skin.Keys[Ruleset.Mode].DrawLongNoteEnd;
+                MathF.Abs(longNoteBodyHeight) + LongNoteSizeDifference <= HitObjectSprite.Height / 2f ||
+                curTime >= Info.EndTime && Info.State is HitObjectState.Held or HitObjectState.Dead;
+            LongNoteEndSprite.Visible =
+                !longNoteOverlap && SkinManager.Skin.Keys[Ruleset.Mode].DrawLongNoteEnd;
             LongNoteBodySprite.Visible = !longNoteOverlap;
         }
 

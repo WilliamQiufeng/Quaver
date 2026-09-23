@@ -17,7 +17,7 @@ namespace Quaver.Shared.Screens.Gameplay.Rulesets.Keys.HitObjects
         private ScrollGroupControllerKeys ScrollGroupController => (ScrollGroupControllerKeys)TimingGroupController;
 
         public override bool ShouldFlipLongNoteEnd =>
-            ScrollGroupController.IsSVNegative(HitObjectInfo.EndTime);
+            ScrollGroupController.IsScrollSpeedNegative(HitObjectInfo.EndTime);
 
         /// <summary>
         ///     Changes of SV direction during this LN.
