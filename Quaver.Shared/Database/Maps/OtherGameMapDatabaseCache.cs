@@ -1,25 +1,18 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading;
-using IniFileParser;
 using Microsoft.Win32;
-using osu.Shared;
-using osu_database_reader.BinaryFiles;
-using Quaver.API.Enums;
-using Quaver.API.Helpers;
 using Quaver.API.Maps.Processors.Difficulty.Rulesets.Keys;
 using Quaver.Shared.Config;
 using Quaver.Shared.Database.Maps.Etterna;
+using Quaver.Shared.Database.Maps.OsuStable;
 using Quaver.Shared.Graphics.Notifications;
 using Quaver.Shared.Helpers;
 using Quaver.Shared.Screens;
 using SQLite;
-using UniversalThreadManagement;
 using Wobble;
 using Wobble.Logging;
-using GameMode = osu.Shared.GameMode;
 
 namespace Quaver.Shared.Database.Maps
 {
@@ -27,61 +20,49 @@ namespace Quaver.Shared.Database.Maps
     {
         /// <summary>
         /// </summary>
-        public static Dictionary<OtherGameCacheAction, List<Map>> MapsToCache { get; private set; }
+        public static Dictionary<OtherGameCacheAction, List<Map>> MapsToCache { get; private set; } = new()
+        {
+            { OtherGameCacheAction.Add, [] },
+            { OtherGameCacheAction.Update, [] },
+            { OtherGameCacheAction.Delete, [] }
+        };
+
+        private static bool Cached { get; set; }
 
         /// <summary>
         ///     Dictates if we need to update the
         /// </summary>
-        public static bool NeedsSync
-        {
-            get
-            {
-                if (MapsToCache == null)
-                    return false;
-
-                try
-                {
-                    return MapsToCache[OtherGameCacheAction.Delete]?.Count > 0 ||
-                           MapsToCache[OtherGameCacheAction.Add]?.Count > 0 ||
-                           MapsToCache[OtherGameCacheAction.Update]?.Count > 0;
-                }
-                catch (Exception e)
-                {
-                    Logger.Error(e, LogType.Runtime);
-                    return false;
-                }
-            }
-        }
+        private static bool NeedsSync => MapsToCache.Values.Any(x => x.Count > 0);
 
         /// <summary>
         ///     The thread that the sync will take place on
         /// </summary>
-        public static Thread Thread { get; private set; }
+        private static Thread? Thread { get; set; }
 
         /// <summary>
         ///     Returns if the cache is currently being synced.
         /// </summary>
-        public static bool IsSyncing => Thread != null && Thread.IsAlive;
+        private static bool IsSyncing => Thread is { IsAlive: true };
 
         /// <summary>
         ///     If we're currently able to sync maps.
         /// </summary>
-        public static bool EligibleToSync => NeedsSync && OnSyncableScreen();
+        private static bool EligibleToSync => NeedsSync && OnSyncableScreen();
 
         /// <summary>
         ///     The amount of maps left to sync
         /// </summary>
-        public static int SyncMapCount => MapsToCache[OtherGameCacheAction.Delete].Count + MapsToCache[OtherGameCacheAction.Add].Count
-                                                + MapsToCache[OtherGameCacheAction.Update].Count;
+        private static int SyncMapCount => MapsToCache.Values.Sum(x => x.Count);
 
         public static void Initialize()
         {
             MapsToCache = new Dictionary<OtherGameCacheAction, List<Map>>()
             {
-                {OtherGameCacheAction.Add, new List<Map>()},
-                {OtherGameCacheAction.Update, new List<Map>()},
-                {OtherGameCacheAction.Delete, new List<Map>()}
+                { OtherGameCacheAction.Add, [] },
+                { OtherGameCacheAction.Update, [] },
+                { OtherGameCacheAction.Delete, [] }
             };
+            Cached = true;
         }
 
         /// <summary>
@@ -101,7 +82,7 @@ namespace Quaver.Shared.Database.Maps
             if (!EligibleToSync)
                 return;
 
-            if (MapsToCache == null && ConfigManager.AutoLoadOsuBeatmaps.Value)
+            if (!Cached && ConfigManager.AutoLoadOsuBeatmaps.Value)
                 MapDatabaseCache.OrderAndSetMapsets();
 
             if (IsSyncing || !NeedsSync)
@@ -109,7 +90,7 @@ namespace Quaver.Shared.Database.Maps
 
             Thread = new Thread(() =>
             {
-                if (MapsToCache != null && NeedsSync)
+                if (!Cached && NeedsSync)
                 {
                     NotificationManager.Show(NotificationLevel.Info,
                         $"Syncing outdated maps in the background. Performance may be lower. {SyncMapCount} maps left!");
@@ -124,12 +105,9 @@ namespace Quaver.Shared.Database.Maps
                 DeleteMaps(DatabaseManager.Connection);
 
                 if (SyncMapCount == 0)
-                    NotificationManager.Show(NotificationLevel.Success, "Successfully completed syncing outdated maps!");
-            })
-            {
-                IsBackground = true,
-                Priority = ThreadPriority.AboveNormal
-            };
+                    NotificationManager.Show(NotificationLevel.Success,
+                        "Successfully completed syncing outdated maps!");
+            }) { IsBackground = true, Priority = ThreadPriority.AboveNormal };
 
             Thread.Start();
         }
@@ -155,7 +133,8 @@ namespace Quaver.Shared.Database.Maps
         /// <summary>
         /// </summary>
         /// <returns></returns>
-        public static List<OtherGameMap> FetchAll() => DatabaseManager.Connection.Table<OtherGameMap>().ToList();
+        private static List<OtherGameMap> FetchAll() =>
+            DatabaseManager.Connection.Table<OtherGameMap>().ToList();
 
         /// <summary>
         /// </summary>
@@ -169,7 +148,7 @@ namespace Quaver.Shared.Database.Maps
             var etternaCharts = new List<OtherGameMap>();
 
             if (!string.IsNullOrEmpty(ConfigManager.OsuDbPath.Value))
-                osuMaps = LoadOsuBeatmapDatabase();
+                osuMaps = OsuStableDatabaseCache.LoadOsuBeatmapDatabase();
 
             if (!string.IsNullOrEmpty(ConfigManager.EtternaDbPath.Value))
                 etternaCharts = EtternaDatabaseCache.Load();
@@ -183,8 +162,8 @@ namespace Quaver.Shared.Database.Maps
                 currentlyCached.RemoveAll(x => x.OriginalGame == OtherGameMapDatabaseGame.Etterna);
 
             // Make sure there're no duplicate Checksums
-            osuMaps = Quaver.Shared.Helpers.ListHelper.DistinctionBy(osuMaps, x => x.Md5Checksum).ToList();
-            etternaCharts = Quaver.Shared.Helpers.ListHelper.DistinctionBy(etternaCharts, x => x.Md5Checksum).ToList();
+            osuMaps = [.. osuMaps.DistinctionBy(x => x.Md5Checksum)];
+            etternaCharts = [.. etternaCharts.DistinctionBy(x => x.Md5Checksum)];
 
             // Creating hash objects
             var osuMapsHash = osuMaps.ToDictionary(x => x.Md5Checksum);
@@ -196,10 +175,12 @@ namespace Quaver.Shared.Database.Maps
             {
                 var map = currentlyCached[i];
 
-                if (!osuMapsHash.ContainsKey(map.Md5Checksum) && !etternaChartsHash.ContainsKey(map.Md5Checksum))
+                if (!osuMapsHash.ContainsKey(map.Md5Checksum) &&
+                    !etternaChartsHash.ContainsKey(map.Md5Checksum))
                 {
                     if (map.OriginalGame == OtherGameMapDatabaseGame.Osu && osuMaps.Count != 0
-                        || map.OriginalGame == OtherGameMapDatabaseGame.Etterna && etternaCharts.Count != 0)
+                        || map.OriginalGame == OtherGameMapDatabaseGame.Etterna &&
+                        etternaCharts.Count != 0)
                     {
                         MapsToCache[OtherGameCacheAction.Delete].Add(map);
                         currentlyCached.Remove(map);
@@ -213,7 +194,8 @@ namespace Quaver.Shared.Database.Maps
                 {
                     // Update directory and path if changed
                     var refMap = osuMapsHash[map.Md5Checksum];
-                    if (refMap != null && (refMap.Directory != map.Directory || refMap.Path != map.Path))
+                    if (refMap != null &&
+                        (refMap.Directory != map.Directory || refMap.Path != map.Path))
                     {
                         MapsToCache[OtherGameCacheAction.Update].Add(map);
                         currentlyCached[i] = refMap;
@@ -222,23 +204,11 @@ namespace Quaver.Shared.Database.Maps
             }
 
             // Find maps that need to be added to the database.
-            foreach (var map in osuMaps)
+            foreach (var map in osuMaps.Concat(etternaCharts)
+                         .Where(map => !currentlyCachedHash.Contains(map.Md5Checksum)))
             {
-                if (!currentlyCachedHash.Contains(map.Md5Checksum))
-                {
-                    MapsToCache[OtherGameCacheAction.Add].Add(map);
-                    currentlyCached.Add(map);
-                }
-            }
-
-            // Find maps that need to be added to the database.
-            foreach (var map in etternaCharts)
-            {
-                if (!currentlyCachedHash.Contains(map.Md5Checksum))
-                {
-                    MapsToCache[OtherGameCacheAction.Add].Add(map);
-                    currentlyCached.Add(map);
-                }
+                MapsToCache[OtherGameCacheAction.Add].Add(map);
+                currentlyCached.Add(map);
             }
 
             currentlyCached.ForEach(x =>
@@ -260,119 +230,12 @@ namespace Quaver.Shared.Database.Maps
                         throw new ArgumentOutOfRangeException();
                 }
 
-                if ((diffOutdated || versionOutdated) && !MapsToCache[OtherGameCacheAction.Add].Contains(x))
+                if ((diffOutdated || versionOutdated) &&
+                    !MapsToCache[OtherGameCacheAction.Add].Contains(x))
                     MapsToCache[OtherGameCacheAction.Update].Add(x);
             });
 
             return currentlyCached;
-        }
-
-        /// <summary>
-        ///     Reads the osu!.db file defined in config and loads all of those maps into the cache.
-        /// </summary>
-        private static List<OtherGameMap> LoadOsuBeatmapDatabase()
-        {
-            try
-            {
-                var db = OsuDb.Read(ConfigManager.OsuDbPath.Value);
-
-                var osuFolder = Path.GetDirectoryName(ConfigManager.OsuDbPath.Value);
-
-                // Default songs path
-                MapManager.OsuSongsFolder = osuFolder + "/Songs/";
-
-                // Read the config file and set the appropriate path
-                var configFile = $"{osuFolder}/osu!.{Environment.UserName}.cfg";
-
-                if (File.Exists(configFile))
-                {
-                    try
-                    {
-                        foreach (var line in File.ReadAllLines(configFile))
-                        {
-                            if (!line.StartsWith("BeatmapDirectory"))
-                                continue;
-
-                            var dir = line.Split("=")[1].Trim();
-
-                            MapManager.OsuSongsFolder = dir == "Songs" ? $"{osuFolder}/{dir}/" : dir + "/";
-                            break;
-                        }
-                    }
-                    catch (Exception e)
-                    {
-                        Logger.Error(e, LogType.Runtime);
-                    }
-                }
-
-                // Find all osu!mania maps and order them by their difficulty value.
-                var osuBeatmaps = db.Beatmaps.Where(x => x.GameMode == GameMode.Mania && (1 <= x.CircleSize && x.CircleSize <= 10)).ToList();
-                osuBeatmaps = osuBeatmaps.OrderBy(x => x.DiffStarRatingMania.ContainsKey(Mods.None) ? x.DiffStarRatingMania[Mods.None] : 0).ToList();
-
-                var osuToQuaverMaps = new List<OtherGameMap>();
-
-                foreach (var map in osuBeatmaps)
-                {
-                    var newMap = new OtherGameMap()
-                    {
-                        Md5Checksum = map.BeatmapChecksum,
-                        Directory = map.FolderName.Trim(),
-                        Path = map.BeatmapFileName,
-                        Artist = map.Artist,
-                        Title = map.Title,
-                        MapSetId = -1,
-                        MapId = -1,
-                        DifficultyName = map.Version,
-                        RankedStatus = RankedStatus.NotSubmitted,
-                        Creator = map.Creator,
-                        AudioPath = map.AudioFileName,
-                        AudioPreviewTime = map.AudioPreviewTime,
-                        Description = $"",
-                        Source = map.SongSource,
-                        Tags = map.SongTags,
-                        // ReSharper disable once CompareOfFloatsByEqualityOperator
-                        Mode = ModeHelper.FromKeyCount((int)map.CircleSize),
-                        SongLength = map.TotalTime,
-                        Game = MapGame.Osu,
-                        OriginalGame = OtherGameMapDatabaseGame.Osu,
-                        BackgroundPath = "",
-                        RegularNoteCount = map.CountHitCircles,
-                        LongNoteCount = map.CountSliders,
-                        LocalOffset = map.OffsetLocal,
-                        OnlineOffset = map.OffsetOnline,
-                        HasScratchKey = map.CircleSize == 8
-                    };
-
-                    // Get the BPM of the osu! maps
-                    if (map.TimingPoints != null)
-                    {
-                        try
-                        {
-                            newMap.Bpm = Math.Round(60000 / map.TimingPoints.Find(x => x.MsPerQuarter > 0).MsPerQuarter, 0);
-                        }
-                        catch (Exception e)
-                        {
-                            newMap.Bpm = 0;
-                        }
-                    }
-
-                    osuToQuaverMaps.Add(newMap);
-                }
-
-                return osuToQuaverMaps;
-            }
-            catch (Exception e)
-            {
-                Logger.Error(e, LogType.Runtime);
-
-                var game = GameBase.Game as QuaverGame;
-                var screen = game?.CurrentScreen;
-
-                if (screen != null)
-                    NotificationManager.Show(NotificationLevel.Error, "Failed to load maps from other games. Is your db path correct in config?");
-
-                return new List<OtherGameMap>();
-            }
         }
 
         /// <summary>
@@ -413,7 +276,7 @@ namespace Quaver.Shared.Database.Maps
                     map.CalculateDifficulties();
 
                     // Etterna doesn't store the object count/common bpm, so add it here.
-                    if (map is OtherGameMap ogm && ogm.OriginalGame == OtherGameMapDatabaseGame.Etterna)
+                    if (map is OtherGameMap { OriginalGame: OtherGameMapDatabaseGame.Etterna })
                     {
                         var qua = map.LoadQua();
 
@@ -480,7 +343,7 @@ namespace Quaver.Shared.Database.Maps
                     map.CalculateDifficulties();
 
                     // Etterna doesn't store the object count/common bpm, so add it here.
-                    if (map is OtherGameMap ogm && ogm.OriginalGame == OtherGameMapDatabaseGame.Etterna)
+                    if (map is OtherGameMap { OriginalGame: OtherGameMapDatabaseGame.Etterna })
                     {
                         var qua = map.LoadQua();
 
@@ -571,25 +434,28 @@ namespace Quaver.Shared.Database.Maps
         /// <exception cref="NotImplementedException"></exception>
         public static void FindOsuStableInstallation()
         {
+            if (!OperatingSystem.IsWindows())
+                return;
             try
             {
-                using (var key = Registry.ClassesRoot.OpenSubKey("osustable.Uri.osu"))
-                {
-                    var value = key?.OpenSubKey(@"shell\open\command")?.GetValue(string.Empty).ToString();
-                    var installPath = value?.Split('"')[1]?.Replace("osu!.exe", "");
+                using var key = Registry.ClassesRoot.OpenSubKey("osustable.Uri.osu");
+                var value = key?.OpenSubKey(@"shell\open\command")?.GetValue(string.Empty)
+                    ?.ToString();
+                var installPath = value?.Split('"')[1]?.Replace("osu!.exe", "");
 
-                    if (string.IsNullOrEmpty(installPath))
-                        return;
+                if (string.IsNullOrEmpty(installPath))
+                    return;
 
-                    ConfigManager.OsuDbPath.Value = $"{installPath}/osu!.db";
+                ConfigManager.OsuDbPath.Value = $"{installPath}/osu!.db";
 
-                    Logger.Important($"Successfully detected osu! installation at path: {ConfigManager.OsuDbPath.Value}",
-                        LogType.Runtime);
-                }
+                Logger.Important(
+                    $"Successfully detected osu! installation at path: {ConfigManager.OsuDbPath.Value}",
+                    LogType.Runtime);
             }
             catch (Exception e)
             {
-                Logger.Warning($"Failed to find osu! installation in the registry", LogType.Runtime);
+                Logger.Warning($"Failed to find osu! installation in the registry",
+                    LogType.Runtime);
             }
         }
 
@@ -598,20 +464,23 @@ namespace Quaver.Shared.Database.Maps
         /// </summary>
         public static void FindEtternaInstallation()
         {
+            if (!OperatingSystem.IsWindows())
+                return;
             try
             {
-                using (var key = Registry.LocalMachine.OpenSubKey("SOFTWARE")?.OpenSubKey("Wow6432Node"))
-                {
-                    var etterna = key?.OpenSubKey("Etterna Team")?.OpenSubKey("Etterna")?.GetValue(string.Empty).ToString();
+                using var key = Registry.LocalMachine.OpenSubKey("SOFTWARE")
+                    ?.OpenSubKey("Wow6432Node");
+                var etterna = key?.OpenSubKey("Etterna Team")?.OpenSubKey("Etterna")
+                    ?.GetValue(string.Empty)?.ToString();
 
-                    if (string.IsNullOrEmpty(etterna))
-                        return;
+                if (string.IsNullOrEmpty(etterna))
+                    return;
 
-                    ConfigManager.EtternaDbPath.Value = $"{etterna}/Cache/cache.db";
+                ConfigManager.EtternaDbPath.Value = $"{etterna}/Cache/cache.db";
 
-                    Logger.Important($"Successfully detected Etterna installation at path: {ConfigManager.EtternaDbPath.Value}",
-                        LogType.Runtime);
-                }
+                Logger.Important(
+                    $"Successfully detected Etterna installation at path: {ConfigManager.EtternaDbPath.Value}",
+                    LogType.Runtime);
             }
             catch (Exception e)
             {
